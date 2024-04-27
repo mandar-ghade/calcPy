@@ -63,8 +63,10 @@ class Expression:
             if isinstance(tk, Token):
                 tks.append(tk)
             elif isinstance(tk, Expression):
-                res.append(ParsableResult(*tks))
-                res[-1].tokens.append(ParsableResult(*tk.parse()))
+                push_to_res = ParsableResult(*tks, ParsableResult(*tk.parse()))
+                res.append(push_to_res)
+                # res.append(ParsableResult(*tks))
+                # res[-1].tokens.append(ParsableResult(*tk.parse()))
                 tks.clear()
         if len(tks) > 1:
             res.extend(tks) # type: ignore

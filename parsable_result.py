@@ -21,6 +21,6 @@ class ParsableResult:
         return f'({"".join(map(str, self.tokens))})'
 
     def solve(self) -> float:
-        """Gets result and parses result from tokens"""
+        """Gets result by parsing from tokens"""
         raise NotImplementedError("Parser not implemented yet")
-        return float()
+

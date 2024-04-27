@@ -1,7 +1,8 @@
-from typing import Iterable, Iterator, Optional
+from typing import Any, Iterable, Iterator, Optional
 from binary_operator import Addition, Division, Exponentiate, Multiplication, Subtraction
 from expression import Expression
 from math_operator import MathOperator
+from parsable_result import ParsableResult
 from tk import Token
 
 
@@ -49,6 +50,9 @@ def tokenize(segment: str) -> Iterator[Token]:
             elif curr == '*' and tk == curr:
                 yield Token(curr + tk)
                 curr = None
+            elif curr is not None and curr != '*' and tk == '*':
+                yield from (Token(curr), Token(tk))
+                curr = None
             else:
                 curr = tk
         except StopIteration:
@@ -58,13 +62,12 @@ def tokenize(segment: str) -> Iterator[Token]:
 
 
 def main() -> None:
-    expr = '(1234.02 + 5678.03+(1/2+(3/4 + 5/3) + 2/9))**2/3.0'
+    expr = '2+3*(1234.02 + 5678.03+(1/2+(5/3/4 + 5/3) + 2/9))'
     tokens = tokenize(expr)
     expression = Expression(*tokens)
-    #print(repr(expression))
-    print(str(expression))
-    # print(expression.parse())
+    print(expression.parse())
     print(*map(str, expression.parse()))
+    print(str(expression))
 
 if __name__ == "__main__":
     main()
