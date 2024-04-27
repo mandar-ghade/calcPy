@@ -51,6 +51,11 @@ class Expression:
             self.expr = self.expr[:i] + [Expression(*self.expr[i+1:rpi])] + self.expr[rpi + 1:] # type: ignore
             tokens = self.get_tokens_of_expression()
 
+    def __add__(self, other: Token | Self) -> Self:
+        self.expr.append(Token('+'))
+        self.extend(other)
+        return self 
+
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}({", ".join(map(repr, self.expr))})'
 

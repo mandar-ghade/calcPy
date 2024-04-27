@@ -29,7 +29,7 @@ def is_digit(x: str) -> bool:
     return x not in operator_map and x not in ALL_PARENTHESES
 
 
-def tokenize(segment: Iterable[str]) -> Iterator[Token]:
+def tokenize(segment: str) -> Iterator[Token]:
     """Tokenization."""
     it = iter(segment)
     curr: Optional[str] = None
@@ -59,7 +59,8 @@ def tokenize(segment: Iterable[str]) -> Iterator[Token]:
 def main() -> None:
     expr = '(1234.02+5678.03+(1/2+(3/4)))**2/3.0'
     tokens = tokenize(expr)
-    expression = Expression(*tokens)
+    expression = Expression(*tokens) + Expression(*tokenize(expr))
+    print(repr(expression))
     print(str(expression))
 
 if __name__ == "__main__":
