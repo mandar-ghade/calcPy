@@ -37,7 +37,7 @@ class Expression:
 
     def simplify_conversion(self) -> None:
         tokens: list[Token] = self.get_tokens_of_expression()
-        while any(lp in tokens for lp in map(Token, LEFT_PARENTHESES)) > 0:
+        while any(lp in tokens for lp in map(Token, LEFT_PARENTHESES)):
             for i, token in enumerate(self.expr):
                 if isinstance(token, Expression) or token.x not in LEFT_PARENTHESES:
                     continue
