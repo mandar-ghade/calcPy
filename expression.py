@@ -1,5 +1,5 @@
-from typing import Iterable, Iterator, Optional, Self
-from math_operator import MathOperator
+from typing import Optional, Self
+from parsable_result import ParsableResult
 from tk import Token
 
 LEFT_PARENTHESES = ('(', '[', '{')
@@ -36,7 +36,7 @@ class Expression:
                           and tokens[n - 1] == RIGHT_PARENTHESES[LEFT_PARENTHESES.index(lp_token.x)])), None)
 
     def get_tokens_of_expression(self) -> list[Token]:
-        return list(filter(lambda x: isinstance(x, Token), self.expr)) # type: ignore # Tokens only
+        return [t for t in self.expr if isinstance(t, Token)]
 
     def simplify_conversion(self) -> None:
         tokens: list[Token] = self.get_tokens_of_expression()
@@ -52,9 +52,23 @@ class Expression:
             tokens = self.get_tokens_of_expression()
 
     def __add__(self, other: Token | Self) -> Self:
-        self.expr.append(Token('+'))
-        self.extend(other)
-        return self 
+        raise NotImplementedError("Not implemented yet")
+
+    def parse(self) -> list[ParsableResult]:
+        res = list[ParsableResult]()
+        if all(isinstance(tk, Token) for tk in self.expr):
+            return [*self.expr] # type: ignore
+        tks = list[Token]()
+        for tk in self.expr:
+            if isinstance(tk, Token):
+                tks.append(tk)
+            elif isinstance(tk, Expression):
+                res.append(ParsableResult(*tks))
+                res[-1].tokens.append(ParsableResult(*tk.parse()))
+                tks.clear()
+        if len(tks) > 1:
+            res.extend(tks) # type: ignore
+        return res
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}({", ".join(map(repr, self.expr))})'
