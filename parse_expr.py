@@ -57,10 +57,10 @@ def tokenize(segment: Iterable[str]) -> Iterator[Token]:
 
 
 def main() -> None:
-    expr = '(1234.02+5678.03)**2/3'
+    expr = '(1234.02+5678.03+(1/2+(3/4)))**2/3.0'
     tokens = tokenize(expr)
     expression = Expression(*tokens)
-    pprint(expression)
+    print(str(expression))
 
 if __name__ == "__main__":
     main()

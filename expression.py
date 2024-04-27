@@ -20,7 +20,10 @@ class Expression:
         self.simplify_conversion()
 
     def extend(self, *expr: Token | Self) -> None:
-        self.expr.extend(expr)
+        if all(isinstance(tk, Token) for tk in expr):
+            self.expr.append(Expression(*expr)) # type: ignore
+        else:
+            self.expr.extend(expr)
 
     def _get_rpi(self, lpi: int, lp_token: Token, tokens: list[Token | Self]) -> Optional[int]:
         """Returns matching rpi to lpi"""
@@ -50,4 +53,7 @@ class Expression:
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}({", ".join(map(repr, self.expr))})'
+
+    def __str__(self) -> str:
+        return f'({"".join(map(str, self.expr))})'
 
