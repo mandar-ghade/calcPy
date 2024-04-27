@@ -1,7 +1,10 @@
 from typing import Iterable, Iterator, Optional
 from binary_operator import Addition, Division, Exponentiate, Multiplication, Subtraction
+from expression import Expression
 from math_operator import MathOperator
 from tk import Token
+
+from pprint import pprint
 
 LEFT_PARENTHESES = ('(', '[', '{')
 RIGHT_PARENTHESES = (')', ']', '}')
@@ -35,7 +38,7 @@ def tokenize(segment: Iterable[str]) -> Iterator[Token]:
             tk = next(it)
             if is_digit(tk) and not curr:
                 curr = tk
-            elif is_digit(tk) and curr: # and curr is implied
+            elif is_digit(tk) and curr: # curr check unnecessary.
                 curr += tk
             elif not is_digit(tk) and curr is not None and tk != '*':
                 yield from (Token(curr), Token(tk))
@@ -56,8 +59,8 @@ def tokenize(segment: Iterable[str]) -> Iterator[Token]:
 def main() -> None:
     expr = '(1234.02+5678.03)**2/3'
     tokens = tokenize(expr)
-    print(*tokens)
-
+    expression = Expression(*tokens)
+    pprint(expression)
 
 if __name__ == "__main__":
     main()

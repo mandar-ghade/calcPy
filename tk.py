@@ -5,3 +5,8 @@ class Token:
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}("{self.x}")'
 
+    def __hash__(self) -> int:
+        return hash(self.x)
+
+    def __eq__(self, other: object) -> bool:
+        return hash(self) == hash(other)
