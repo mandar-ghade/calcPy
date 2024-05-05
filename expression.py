@@ -1,10 +1,29 @@
-from typing import Optional, Self
-from parsable_result import ParsableResult
+from abc import ABCMeta
+from typing import Iterable, Iterator, Optional, Self
+from binary_operator import Addition, BinaryOperator, Division, Exponentiate, Multiplication, Subtraction
+from math_operator import MathOperator
 from tk import Token
+from unary_operator import UnaryOperator
 
 LEFT_PARENTHESES = ('(', '[', '{')
 RIGHT_PARENTHESES = (')', ']', '}')
 ALL_PARENTHESES = LEFT_PARENTHESES + RIGHT_PARENTHESES
+
+
+operator_map: dict[str, type[MathOperator]] = {
+    '+': Addition,
+    '-': Subtraction,
+    '*': Multiplication,
+    '/': Division,
+    '**': Exponentiate,
+}
+
+
+operator_priorities_mapped: dict[int, tuple[type[MathOperator], ...]] = {
+    1: (Exponentiate, ),
+    2: (Multiplication, Division, ),
+    3: (Addition, Subtraction, ),
+}
 
 
 class RightParenthesisNotFoundException(Exception):
@@ -48,29 +67,11 @@ class Expression:
                 if rpi is None:
                     raise RightParenthesisNotFoundException("Matching right parenthesis not found.")
                 break
-            self.expr = self.expr[:i] + [Expression(*self.expr[i+1:rpi])] + self.expr[rpi + 1:] # type: ignore
+            self.expr = self.expr[:i] + [Expression(*self.expr[i + 1:rpi])] + self.expr[rpi + 1:] # type: ignore
             tokens = self.get_tokens_of_expression()
 
-    def __add__(self, other: Token | Self) -> Self:
-        raise NotImplementedError("Not implemented yet")
-
-    def parse(self) -> list[ParsableResult]:
-        res = list[ParsableResult]()
-        if all(isinstance(tk, Token) for tk in self.expr):
-            return [*self.expr] # type: ignore
-        tks = list[Token]()
-        for tk in self.expr:
-            if isinstance(tk, Token):
-                tks.append(tk)
-            elif isinstance(tk, Expression):
-                push_to_res = ParsableResult(*tks, ParsableResult(*tk.parse()))
-                res.append(push_to_res)
-                # res.append(ParsableResult(*tks))
-                # res[-1].tokens.append(ParsableResult(*tk.parse()))
-                tks.clear()
-        if len(tks) > 1:
-            res.extend(tks) # type: ignore
-        return res
+    def __iter__(self) -> Iterator[Token | Self]:
+        return (v for v in self.expr)
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}({", ".join(map(repr, self.expr))})'

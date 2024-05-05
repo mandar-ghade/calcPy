@@ -7,4 +7,4 @@ class MathOperator(ABC):
     @abstractmethod 
     def solve(self) -> float:
         """Solves expression."""
-
+ 

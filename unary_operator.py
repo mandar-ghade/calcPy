@@ -13,16 +13,12 @@ class UnaryOperator(MathOperator):
 
 
 class Cos(UnaryOperator):
-    def __init__(self, n: float) -> None:
-        super().__init__(n)
 
     def solve(self) -> float:
         return cos(self.n)
 
 
 class Sin(UnaryOperator):
-    def __init__(self, n: float) -> None:
-        super().__init__(n)
 
     def solve(self) -> float:
         return sin(self.n)
