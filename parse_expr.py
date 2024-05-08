@@ -129,14 +129,17 @@ def tokenize(segment: str) -> Iterator[Token]:
 
 def is_binary(operator_str: str) -> bool:
     operator = operator_map.get(operator_str) 
-    assert operator is not None, 'Operator was not found' 
-    return issubclass(operator, BinaryOperator)
+    # assert operator is not None, 'Operator was not found' 
+    return operator is not None and issubclass(operator, BinaryOperator)
 
 
 type IntermediateToken = tuple[int, Optional[Token | Expression | MathOperator]] # int represents index, output represents Intermediate Token.
 
 
-def get_tokens_at_priority_level(level: int, it: Iterable[IntermediateToken]) -> Iterator[tuple[int, Token | Expression]]:
+def get_tokens_at_priority_level(
+        level: int,
+        it: Iterable[IntermediateToken]
+) -> Iterator[tuple[int, Token | Expression]]:
     match = operator_priorities_mapped.get(level, None)
     assert (level != 0 and match) or level == 0, f'Priority level {level} does not exist.'
     for index, value in it: 
@@ -154,6 +157,24 @@ def map_by_index(expr: Expression) -> Iterator[IntermediateToken]:
 
 type TokenDuplet = tuple[IntermediateToken, IntermediateToken] # unary
 type TokenTriplet = tuple[IntermediateToken, IntermediateToken, IntermediateToken] # binary
+
+def map_into_duplets(
+        it: Iterable[IntermediateToken]
+        ) -> Optional[Iterator[TokenDuplet]]:
+    it = PeekableIterator(it)
+    while True:
+        try:
+            operation_index, operation = next(it)
+            if not isinstance(operation, Token) \
+                    or is_binary(operation.x) \
+                    or not isinstance(it.peek(), tuple) \
+                    or not isinstance(it.peek()[1], Expression):
+                continue
+            expression_index, expression = next(it)
+            yield ((operation_index, operation), (expression_index, expression))
+        except StopIteration:
+            break
+
 
 
 def map_into_triplets(
@@ -194,8 +215,25 @@ def flatten(it: Iterable[Any]) -> Iterator[Any]:
 def parse(curr_expr: Expression) -> MathOperator:
     """Parses Expression"""
     intermediate_tokens: list[IntermediateToken] = list(map_by_index(curr_expr))
-    triplet_map: list[TokenTriplet] = list(map_into_triplets(intermediate_tokens))
     expr_map: dict[tuple[int, MathOperator], set[IntermediateToken]] = {}
+
+    index_shift_left_count = 0
+    for (operation_index, operation_), (expression_i, expression_) in map_into_duplets(intermediate_tokens):
+        assert isinstance(operation_, Token)
+        matching_unary_operation: Optional[type[MathOperator]] = operator_map.get(operation_.x)
+        assert matching_unary_operation \
+                and not is_binary(operation_.x) \
+                and issubclass(matching_unary_operation, UnaryOperator) \
+                and isinstance(expression_, Expression)
+        expr_res: float = parse(expression_).solve()
+        token_res: UnaryOperator = matching_unary_operation(expr_res)
+        new_token = Token(f"{token_res.solve()}")
+        intermediate_tokens[operation_index - index_shift_left_count] = (operation_index, new_token)
+        intermediate_tokens.pop(expression_i - index_shift_left_count)
+        index_shift_left_count += 1
+
+    triplet_map: list[TokenTriplet] = list(map_into_triplets(intermediate_tokens))
+
     for level in range(0, 4):
         matches: list[tuple[int, Token | Expression]] = list(get_tokens_at_priority_level(level, intermediate_tokens))
         for left, middle, right in triplet_map:
@@ -238,42 +276,45 @@ def parse(curr_expr: Expression) -> MathOperator:
             operation = matched_operation(n1, n2)
 
             if (j, operation) in expr_map:
+                print('no!!!!!')
                 expr_map[(j, operation)].add((i, left))
                 expr_map[(j, operation)].add((k, right))
             elif left_is_matched and right_is_matched:
                 left_key, left_tokens = next(((op, mapped_tokens) 
-                                    for op, mapped_tokens in expr_map.items()
-                                    if (i, left) in mapped_tokens or left == op[1]))
+                                              for op, mapped_tokens in expr_map.items()
+                                              if (i, left) in mapped_tokens or left == op[1]))
                 right_key, right_tokens = next(((op, mapped_tokens)
-                                     for op, mapped_tokens in expr_map.items()
-                                     if (k, right) in mapped_tokens or right == op[1]))
+                                                for op, mapped_tokens in expr_map.items()
+                                                if (k, right) in mapped_tokens or right == op[1]))
                 expr_map.pop(left_key)
                 expr_map.pop(right_key)
                 expr_map[(j, operation)] = left_tokens.union(right_tokens)
             elif left_is_matched:
                 left_key, left_tokens = next(((op, mapped_tokens) 
-                                    for op, mapped_tokens in expr_map.items()
-                                    if (i, left) in mapped_tokens or left == op[1]))
+                                              for op, mapped_tokens in expr_map.items()
+                                              if (i, left) in mapped_tokens or left == op[1]))
                 left_tokens.add((k, right))
                 expr_map.pop(left_key)
                 expr_map[(j, operation)] = left_tokens
             elif right_is_matched:
                 right_key, right_tokens = next(((op, mapped_tokens)
-                                     for op, mapped_tokens in expr_map.items()
-                                     if (k, right) in mapped_tokens or right == op[1]))
+                                                for op, mapped_tokens in expr_map.items()
+                                                if (k, right) in mapped_tokens or right == op[1]))
                 right_tokens.add((i, left))
                 expr_map.pop(right_key)
                 expr_map[(j, operation)] = right_tokens
             else:
                 expr_map[(j, operation)] = {(i, left), (k, right)}
-    #pprint(expr_map)
     return next((val[1] for val in expr_map))
 
 
 def main() -> None:
-    expr = '2.5**((3*(523.06/123+0)*3)**0.1)' # bug with parsing multiple ** at once, needs multiple parenthesis
+    expr = '(2.5**((3*(523.06/123+0)*3)**0.1))+(2+2)**3+(4-3)**2+2*sin(5+0)*cos(83+0)' # bug with parsing multiple ** at once, needs multiple parenthesis
     tokens = tokenize(expr)
+    #print(*map(repr, tokenize(expr)))
     expression = Expression(*tokens)
+    # print(*map_into_duplets(map_by_index(expression)))
+    #print(*map(repr, expression))
     res = parse(expression)
     print('parsed expression: ', res)
     print('result: ', res.solve())

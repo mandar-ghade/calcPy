@@ -1,6 +1,7 @@
 from math import log
 from math_operator import MathOperator
 
+## TODO: Make inputs optional for single-digit inputs
 
 class BinaryOperator(MathOperator):
     def __init__(self, n1: float | MathOperator, n2: float | MathOperator) -> None:
