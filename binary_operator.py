@@ -1,12 +1,13 @@
 from math import log
+from typing import Optional
 from math_operator import MathOperator
 
 ## TODO: Make inputs optional for single-digit inputs
 
 class BinaryOperator(MathOperator):
-    def __init__(self, n1: float | MathOperator, n2: float | MathOperator) -> None:
+    def __init__(self, n1: float | MathOperator, n2: Optional[float | MathOperator]) -> None:
         self.n1 = n1
-        self.n2 = n2
+        self.n2 = n2 if n2 is not None else 0 
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}({self.n1}, {self.n2})' 
