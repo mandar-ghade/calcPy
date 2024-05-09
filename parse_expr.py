@@ -1,5 +1,5 @@
 from typing import Any, Iterable, Iterator, Optional
-from binary_operator import Addition, BinaryOperator, Division, Exponentiate, Log, Multiplication, Subtraction
+from binary_operator import Add, BinaryOperator, Divide, Exp, Log, Multiply, Subtract
 from expression import Expression
 from math_operator import MathOperator
 from peekable_iterator import PeekableIterator
@@ -14,11 +14,11 @@ ALL_PARENTHESES = LEFT_PARENTHESES + RIGHT_PARENTHESES
 
 
 operator_map: dict[str, type[MathOperator]] = {
-    '+': Addition,
-    '-': Subtraction,
-    '*': Multiplication,
-    '/': Division,
-    '**': Exponentiate,
+    '+': Add,
+    '-': Subtract,
+    '*': Multiply,
+    '/': Divide,
+    '**': Exp,
     'log': Log,
     'cos': Cos, # unary operator
     'sin': Sin # unary operator
@@ -29,9 +29,9 @@ unary_operators: tuple[type[UnaryOperator], ...] = (Cos, Sin, )
 
 
 operator_priorities_mapped: dict[int, tuple[type[MathOperator], ...]] = {
-    1: (Exponentiate, ),
-    2: (Multiplication, Division, ),
-    3: (Addition, Subtraction, ),
+    1: (Exp, ),
+    2: (Multiply, Divide, ),
+    3: (Add, Subtract, ),
 }
 
 def map_to_operator(tk: Token) -> Optional[type[MathOperator]]:
@@ -217,11 +217,11 @@ def parse(curr_expr: Expression) -> MathOperator:
     """Parses Expression"""
     intermediate_tokens: list[IntermediateToken] = list(map_by_index(curr_expr))
 
-    if len(intermediate_tokens) == 1: # parses single-digit expression Addition operation.
+    if len(intermediate_tokens) == 1: # parses single-digit expression Add operation.
         i, tk = intermediate_tokens[0]
         assert isinstance(tk, Token)
         tk = float(tk.x)
-        return Addition(tk, None)
+        return Add(tk, None)
 
     expr_map: dict[tuple[int, MathOperator], set[IntermediateToken]] = {}
 
@@ -249,7 +249,7 @@ def parse(curr_expr: Expression) -> MathOperator:
 
     triplet_map: list[TokenTriplet] = list(map_into_triplets(intermediate_tokens))
 
-    for level in range(0, 4): # 1 for Expression (parenthesis), 2 for Multiplication/Division, 3 for Addition/Subtraction.
+    for level in range(0, 4): # 1 for Expression (parenthesis), 2 for Multiply/Divide, 3 for Add/Subtract.
         matches: list[tuple[int, Token | Expression]] = list(get_tokens_at_priority_level(level, intermediate_tokens))
         for left, middle, right in triplet_map:
             i, left = left

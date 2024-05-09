@@ -19,7 +19,7 @@ class BinaryOperator(MathOperator):
         return hash(self) == hash(__value)
 
 
-class Addition(BinaryOperator):
+class Add(BinaryOperator):
 
     def solve(self) -> float:
         n1, n2 = self.n1, self.n2
@@ -30,7 +30,7 @@ class Addition(BinaryOperator):
         return n1 + n2
 
 
-class Subtraction(BinaryOperator):
+class Subtract(BinaryOperator):
 
     def solve(self) -> float:
         n1, n2 = self.n1, self.n2
@@ -41,7 +41,7 @@ class Subtraction(BinaryOperator):
         return n1 - n2
 
 
-class Multiplication(BinaryOperator):
+class Multiply(BinaryOperator):
 
     def solve(self) -> float:
         n1, n2 = self.n1, self.n2
@@ -52,7 +52,7 @@ class Multiplication(BinaryOperator):
         return n1 * n2
 
 
-class Division(BinaryOperator):
+class Divide(BinaryOperator):
 
     def solve(self) -> float:
         n1, n2 = self.n1, self.n2
@@ -63,7 +63,7 @@ class Division(BinaryOperator):
         return n1 / n2
 
 
-class Exponentiate(BinaryOperator):
+class Exp(BinaryOperator):
 
     def solve(self) -> float:
         n1, n2 = self.n1, self.n2

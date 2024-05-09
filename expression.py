@@ -1,6 +1,6 @@
 from abc import ABCMeta
 from typing import Iterable, Iterator, Optional, Self
-from binary_operator import Addition, BinaryOperator, Division, Exponentiate, Multiplication, Subtraction
+from binary_operator import Add, BinaryOperator, Divide, Exp, Multiply, Subtract
 from math_operator import MathOperator
 from tk import Token
 from unary_operator import UnaryOperator
@@ -11,18 +11,18 @@ ALL_PARENTHESES = LEFT_PARENTHESES + RIGHT_PARENTHESES
 
 
 operator_map: dict[str, type[MathOperator]] = {
-    '+': Addition,
-    '-': Subtraction,
-    '*': Multiplication,
-    '/': Division,
-    '**': Exponentiate,
+    '+': Add,
+    '-': Subtract,
+    '*': Multiply,
+    '/': Divide,
+    '**': Exp,
 }
 
 
 operator_priorities_mapped: dict[int, tuple[type[MathOperator], ...]] = {
-    1: (Exponentiate, ),
-    2: (Multiplication, Division, ),
-    3: (Addition, Subtraction, ),
+    1: (Exp, ),
+    2: (Multiply, Divide, ),
+    3: (Add, Subtract, ),
 }
 
 
